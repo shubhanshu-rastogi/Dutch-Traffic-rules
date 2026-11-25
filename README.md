@@ -4,6 +4,8 @@ Learn all 165 Dutch road traffic signs from the *Reglement verkeersregels en ver
 
 It is an installable web app (PWA): it works offline and can be added to a phone's home screen. No app store, no cost.
 
+**Live app:** <https://shubhanshu-rastogi.github.io/Dutch-Traffic-rules/>
+
 ## Run it locally
 
 ```bash
@@ -14,14 +16,11 @@ Then open <http://localhost:8000>. (Offline mode needs `http://localhost` or `ht
 
 ## Publish free on GitHub Pages
 
-1. Create an empty repository on GitHub (for example `dutch-road-signs-trainer`).
-2. Push this folder to it:
-   ```bash
-   git remote add origin https://github.com/<your-username>/dutch-road-signs-trainer.git
-   git push -u origin main
-   ```
-3. On GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-4. The workflow in `.github/workflows/pages.yml` deploys on every push to `main`. The site appears at `https://<your-username>.github.io/dutch-road-signs-trainer/`.
+This repository deploys itself: the workflow in `.github/workflows/pages.yml` publishes the site on every push to `main`.
+
+One-time setup on GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
+The site is then at <https://shubhanshu-rastogi.github.io/Dutch-Traffic-rules/>.
 
 ## Install on a phone
 
