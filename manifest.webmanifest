@@ -1,7 +1,7 @@
 {
   "name": "Dutch Road Signs Trainer",
   "short_name": "Road Signs",
-  "description": "Learn all 165 Dutch road traffic signs (RVV 1990) with animated road examples and a quiz.",
+  "description": "Learn all 165 Dutch road traffic signs (RVV 1990) and 18 road markings with animated road examples and a quiz.",
   "id": "./",
   "start_url": "./",
   "scope": "./",

@@ -1,6 +1,6 @@
 # Dutch Road Signs Trainer
 
-Learn all 165 Dutch road traffic signs from the *Reglement verkeersregels en verkeerstekens 1990* (RVV 1990), one at a time. Every sign has a plain-English meaning, what to do, a tip, and an animated top-down road example. A quiz mode tests you.
+Learn all 165 Dutch road traffic signs from the *Reglement verkeersregels en verkeerstekens 1990* (RVV 1990), one at a time, plus 18 road markings (lines, shark teeth, cycle and bus lanes, kerb lines). Every sign and marking has a plain-English meaning, what to do, a tip, and an animated top-down road example. A quiz mode tests you.
 
 It is an installable web app (PWA): it works offline and can be added to a phone's home screen. No app store, no cost.
 
@@ -36,6 +36,7 @@ After the first visit, everything is cached and works without a connection.
 | `data.js` | The 165 signs: names, meanings, tips, scene settings |
 | `scenes.js` | Engine that draws and animates the road examples (SVG) |
 | `signs/` | Sign images |
+| `markings/` | Road-marking images (drawn by `scripts/build-markings.py`) |
 | `icons/`, `manifest.webmanifest` | App icon and install settings |
 | `sw.js` | Offline cache (generated, see below) |
 | `pwa.js` | Registers the offline cache and the install button |

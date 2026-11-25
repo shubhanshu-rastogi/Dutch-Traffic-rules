@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 INCLUDE = ['index.html', 'manifest.webmanifest', 'app.js', 'data.js', 'scenes.js', 'pwa.js']
 INCLUDE += sorted(str(p.relative_to(ROOT)) for p in (ROOT / 'icons').glob('*.png'))
 INCLUDE += sorted(str(p.relative_to(ROOT)) for p in (ROOT / 'signs').glob('*.webp'))
+INCLUDE += sorted(str(p.relative_to(ROOT)) for p in (ROOT / 'markings').glob('*.svg'))
 
 h = hashlib.sha256()
 for f in INCLUDE:

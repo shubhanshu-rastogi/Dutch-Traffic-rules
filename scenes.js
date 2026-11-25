@@ -42,6 +42,8 @@
     (o.gaps ? splitSeg(x0, x1, o.gaps) : [[x0, x1]]).forEach(([a, b]) => {
       if (c === 'dash') s += `<path d="M${a} ${y}H${b}" stroke="${P.mark}" stroke-width="4" stroke-dasharray="26 18"/>`;
       if (c === 'solid') s += `<path d="M${a} ${y}H${b}" stroke="${P.mark}" stroke-width="4"/>`;
+      if (c === 'mixed') s += `<path d="M${a} ${y - 6}H${b}" stroke="${P.mark}" stroke-width="4"/><path d="M${a} ${y + 6}H${b}" stroke="${P.mark}" stroke-width="4" stroke-dasharray="26 18"/>`;
+      if (c === 'warn') { const m = o.warnX || 430; s += `<path d="M${a} ${y}H${m}" stroke="${P.mark}" stroke-width="4" stroke-dasharray="26 18"/><path d="M${m + 8} ${y}H${b}" stroke="${P.mark}" stroke-width="4"/>`; [m - 170, m - 90].forEach(ax => s += `<path transform="translate(${ax},${y + 18}) rotate(-16)" d="M-20 -3h24v-7l13 10l-13 10v-7h-24z" fill="${P.mark}"/>`); }
       if (c === 'double') s += `<path d="M${a} ${y - 4}H${b}M${a} ${y + 4}H${b}" stroke="${P.mark}" stroke-width="3"/>`;
     });
     return s;
@@ -80,6 +82,7 @@
   function zebraH(y, x0, x1, h = 46) { let s = ''; for (let x = x0 + 4; x < x1 - 6; x += 16) s += rect(x, y - h / 2, 9, h, P.mark); return s; }
   // upright sign seen from above: pole base at (x,y), panel rises "up" the screen
   function sign(x, y, code, s = 58, o = {}) {
+    if (!code) return '';
     const plate = o.plate ? `<g><rect x="${x - 34}" y="${y - 12}" width="68" height="15" rx="2" fill="#fff" stroke="#333" stroke-width="1"/><text x="${x}" y="${y - 1.5}" font-size="9" text-anchor="middle" font-family="Overpass,Inter,sans-serif" font-weight="700" fill="#222">${esc(o.plate)}</text></g>` : '';
     const ph = o.plate ? 16 : 0;
     return `<g class="sc-sign"><ellipse cx="${x}" cy="${y + 2}" rx="11" ry="4" fill="#0003"/><rect x="${x - 2}" y="${y - 16 - ph}" width="4" height="${18 + ph}" fill="#8d939b"/>${plate}<image href="signs/${code}.webp" x="${x - s / 2}" y="${y - 16 - ph - s}" width="${s}" height="${s}" preserveAspectRatio="xMidYMax meet" filter="url(#scShadow)"/></g>`;
@@ -144,6 +147,8 @@
     cow: () => `<ellipse cx="2" cy="3" rx="16" ry="8" fill="#0002"/><ellipse cx="-2" cy="0" rx="15" ry="8" fill="#fafafa" stroke="#555" stroke-width="1"/><circle cx="-6" cy="-3" r="4" fill="#222"/><circle cx="3" cy="3" r="3.4" fill="#222"/><ellipse cx="15" cy="0" rx="6" ry="4.5" fill="#f0c0b4" stroke="#555" stroke-width="1"/>`,
     deer: () => `<ellipse cx="2" cy="3" rx="14" ry="6" fill="#0002"/><ellipse cx="-2" cy="0" rx="13" ry="5.5" fill="#a86a3c"/><ellipse cx="12" cy="0" rx="5" ry="3.5" fill="#a86a3c"/><path d="M14 -3l4 -7m-6 6l-1 -8M14 3l4 7m-6 -6l-1 8" stroke="#5a3b22" stroke-width="1.8" stroke-linecap="round"/>`,
     barrier: () => `<rect x="-4" y="-6" width="10" height="12" fill="#555"/><rect x="0" y="-3" width="128" height="6" rx="2" fill="#fff" stroke="#d33" stroke-width="1"/><path d="M14 -3v6M34 -3v6M54 -3v6M74 -3v6M94 -3v6M114 -3v6" stroke="#d93a32" stroke-width="9" stroke-dasharray="0"/>`,
+    tlRed: () => `<rect x="-10" y="-27" width="20" height="54" rx="6" fill="#1d1d1d"/><circle cy="-14" r="6" fill="#ff3b30"/><circle cy="0" r="6" fill="#4a4628"/><circle cy="14" r="6" fill="#233d27"/>`,
+    tlGreen: () => `<rect x="-10" y="-27" width="20" height="54" rx="6" fill="#1d1d1d"/><circle cy="-14" r="6" fill="#4a2321"/><circle cy="0" r="6" fill="#4a4628"/><circle cy="14" r="6" fill="#34c759"/>`,
     bollard: () => `<circle r="9" fill="#555"/><circle r="6.5" fill="#d93a32"/><circle r="3" fill="#fff"/>`,
     officer: () => `<ellipse cx="1" cy="3" rx="7" ry="9" fill="#0002"/><ellipse cx="0" cy="0" rx="5.5" ry="9" fill="#1d2a57"/><circle cx="1" cy="0" r="4.6" fill="#f3d36b"/><path d="M5 -2l12 -8" stroke="#1d2a57" stroke-width="3" stroke-linecap="round"/>`,
     plane: () => `<path d="M26 0l-8 -3h-14l-10 -22h-7l6 22h-14l-5 -7h-5l3 10l-3 10h5l5 -7h14l-6 22h7l10 -22h14z" fill="#e7eaee" stroke="#8b939c" stroke-width="1.2"/>`,
@@ -385,7 +390,7 @@
       actors.push({ g: 'car', color: P.you, label: 'You', path: YOU, keys: [[0, 0], [2, stopD, 'o'], [5.6, stopD], [8.6, 'end', 'i']], badges: [{ a: 1.8, b: 5.4, k: m === 'stop' ? 'stop' : 'wait', txt: m === 'stop' ? 'Full stop at the line' : 'Give way' }] });
       actors.push({ g: 'car', color: '#c8483e', label: 'Main road', path: JE, keys: [[0.4, 0], [4.6, 'end']], noLabel: false, badges: [{ a: 2, b: 4, k: 'ok', txt: 'Has priority' }] });
       actors.push({ g: 'truck', color: '#3a7d5c', label: 'Main road', path: WB, keys: [[1.2, 0], [5.6, 'end']], noLabel: true });
-      caps = m === 'stop' ? [[0, 'Your road meets a main road: STOP sign and stop line'], [1.8, 'Stop completely at the line, even if the road looks empty'], [5.6, 'Give way to all traffic on the main road, then go']]
+      caps = o.caps ? o.caps : m === 'stop' ? [[0, 'Your road meets a main road: STOP sign and stop line'], [1.8, 'Stop completely at the line, even if the road looks empty'], [5.6, 'Give way to all traffic on the main road, then go']]
         : [[0, 'Shark teeth and this sign: the main road has priority'], [1.8, 'Slow down and let traffic on the main road pass, from both directions'], [5.6, 'Then turn into the main road']];
       return { base, actors, caps, dur: 9.5, hud: m === 'stop' ? [[0, 40], [2, 0], [5.6, 0], [7, 30]] : null };
     }
@@ -543,9 +548,10 @@
 
   /* OVERTAKING on a two-lane road */
   function overtake(o) {
-    let base = bg(22) + decor(21) + roadH(ROADY, 128, { center: o.solid ? 'solid' : 'dash' });
+    let base = bg(22) + decor(21) + roadH(ROADY, 128, { center: o.center || (o.solid ? 'solid' : 'dash') });
+    if (o.extraBase) base += o.extraBase;
     base += sign(o.signX || 330, SIGN_Y, o.code, 60);
-    const slowG = o.slow || 'car', slowC = slowG === 'car' ? '#8a96a3' : '#3a7d5c';
+    const slowG = o.slow || 'car', slowC = slowG === 'car' ? '#8a96a3' : slowG === 'tractor' ? '#3f9a3f' : '#3a7d5c';
     const slow = { g: slowG, color: slowC, label: o.slowLabel || 'Slower vehicle', path: EAST, keys: [[0, xd(120)], [12, xd(120) + 12 * 70]] };
     o.passAt = o.passAt || 500;
     const PASS = `M-90 ${E_Y}H${o.passAt - 80}Q${o.passAt - 40} ${E_Y} ${o.passAt} ${W_Y}H${o.passAt + 140}Q${o.passAt + 180} ${W_Y} ${o.passAt + 220} ${E_Y}H900`;
@@ -807,5 +813,115 @@
     });
   }
 
-  window.Scenes = { mount, speed, ban, endOf, prio, roundabout, island, turns, oneway, park: parkScene, overtake, narrow, lanes, warn, railX, tramX, zebra, busStop, deadEnd, direction, tunnel, homeZone, checkpoint, transfer, shoulder, P, xd, wd, EAST, WEST, E_Y, W_Y, ROADY, sign, label, houses, roadH, bg, decor };
+
+  /* ===== ROAD MARKINGS ===== */
+  // M7: stop line at a traffic light
+  function stopLine(o) {
+    let base = crossBase({ top: true }) + rect(CX - VW - 14, CY + 4, 10, HW - 4, P.mark);
+    const lightAt = { x: CX - VW - 30, y: CY + HW + 40, r: 0 };
+    const actors = [
+      { g: 'tlRed', at: lightAt, noLabel: true, op: [[0, 1], [5.4, 1], [5.45, 0]] },
+      { g: 'tlGreen', at: lightAt, noLabel: true, op: [[0, 0], [5.4, 0], [5.45, 1]] },
+      { g: 'car', color: P.you, label: 'You', path: JE, keys: [[0, 0], [2.6, xd(CX - VW - 42), 'o'], [5.6, xd(CX - VW - 42)], [9, 'end', 'i']], badges: [{ a: 2.4, b: 5.4, k: 'stop', txt: 'Red: stop at the line' }, { a: 5.6, b: 7.6, k: 'ok', txt: 'Green: go' }] },
+      { g: 'car', color: '#c8483e', noLabel: true, path: N_UP, keys: [[0.8, 0], [4.6, 'end']] },
+      { g: 'van', color: '#e9eef3', noLabel: true, path: S_DN, keys: [[1.8, 0], [5.4, 'end']] }
+    ];
+    return { base, actors, caps: o.caps, dur: 9.6, hud: [[0, 50], [2.6, 0], [5.6, 0], [7.5, 40]] };
+  }
+  // M5: hatched area (divider) between diverging lines
+  function hatched(o) {
+    let base = bg(60) + decor(61) + roadH(ROADY, 128, { center: 'dash', x1: 300 }) + roadH(ROADY, 128, { center: 'none', x0: 300 });
+    base += `<defs><clipPath id="hz"><path d="M300 ${ROADY}L500 ${ROADY - 25}H810V${ROADY + 25}H500Z"/></clipPath></defs><g clip-path="url(#hz)">`;
+    for (let x = 280; x < 840; x += 22) base += `<path d="M${x} ${ROADY - 40}l40 80" stroke="${P.mark}" stroke-width="5"/>`;
+    base += `</g><path d="M300 ${ROADY}L500 ${ROADY - 25}H810M300 ${ROADY}L500 ${ROADY + 25}H810" stroke="${P.mark}" stroke-width="4" fill="none"/>`;
+    base += ghost(`M180 ${E_Y}Q330 ${E_Y} 470 ${ROADY + 4}H600`, 'no', 616, ROADY + 4);
+    const actors = [
+      { g: 'car', color: P.you, label: 'You', path: `M-90 ${E_Y}H300Q420 ${E_Y} 520 ${E_Y + 10}H890`, keys: [[0, 0], [6.6, 'end']], badges: [{ a: 1.6, b: 5.4, k: 'ok', txt: 'Stay in your lane' }] },
+      { g: 'car', color: '#c8483e', noLabel: true, path: `M890 ${W_Y - 10}H520Q420 ${W_Y} 300 ${W_Y}H-90`, keys: [[0.6, 0], [7.2, 'end']] }
+    ];
+    return { base, actors, caps: o.caps, dur: 8 };
+  }
+  // M9 / M10: cycle lane (solid border + bike symbol) or advisory lane (dashed border)
+  function cycleLane(o) {
+    const top = ROADY - 80, bot = ROADY + 80, adv = o.advisory;
+    let base = bg(62) + houses(30, [10, 100, 190, 280, 520, 610, 700], 56) + rect(-10, top - 18, 820, 18, P.pave) + rect(-10, bot, 820, 22, P.pave);
+    base += rect(-10, top, 820, bot - top, P.asph) + rect(-10, top, 820, 30, P.bike) + rect(-10, bot - 30, 820, 30, P.bike);
+    const bl = (y) => adv ? `<path d="M-10 ${y}H810" stroke="${P.mark}" stroke-width="3.5" stroke-dasharray="14 12"/>` : `<path d="M-10 ${y}H810" stroke="${P.mark}" stroke-width="4"/>`;
+    base += bl(top + 30) + bl(bot - 30) + `<path d="M-10 ${ROADY}H810" stroke="${P.mark}" stroke-width="3" stroke-dasharray="26 18" opacity="${adv ? 0 : 1}"/>`;
+    if (!adv) [140, 520].forEach(x => { base += `<g transform="translate(${x},${bot - 15}) scale(.55)" fill="none" stroke="${P.mark}" stroke-width="4" stroke-linecap="round"><circle cx="-14" cy="6" r="9"/><circle cx="14" cy="6" r="9"/><path d="M-14 6l9 -15h16l3 15M-5 -9l5 15h14"/></g>`; });
+    let actors;
+    if (adv) {
+      actors = [
+        { g: 'bike', color: '#e05a7a', label: 'Cyclist', path: `M-60 ${bot - 15}H900`, keys: [[0, 0], [12, 'end']] },
+        { g: 'truck', color: '#3a7d5c', noLabel: true, path: `M890 ${ROADY - 26}H-150`, keys: [[2, 0], [7, 'end']] },
+        { g: 'car', color: P.you, label: 'You', path: `M-90 ${ROADY + 22}H360Q400 ${ROADY + 22} 430 ${bot - 22}H560Q600 ${bot - 22} 640 ${ROADY + 22}H890`, keys: [[0, 0], [3.4, 300], [9.8, 'end']], badges: [{ a: 3.8, b: 6.6, k: 'ok', txt: 'May use it when free' }] }
+      ];
+    } else {
+      base += ghost(`M200 ${ROADY + 22}Q260 ${ROADY + 22} 300 ${bot - 15}H380`, 'no', 396, bot - 15);
+      actors = [
+        { g: 'bike', color: '#e05a7a', label: 'Cyclist', path: `M-60 ${bot - 15}H900`, keys: [[0, 0], [10, 'end']], badges: [{ a: 1.6, b: 8, k: 'ok', txt: 'Cycle lane: bikes only' }] },
+        { g: 'car', color: P.you, label: 'You', path: `M-90 ${ROADY + 22}H890`, keys: [[1, 0], [7.6, 'end']], badges: [{ a: 2.6, b: 6, k: 'ok', txt: 'Cars stay out' }] },
+        { g: 'car', color: '#c8483e', noLabel: true, path: `M890 ${ROADY - 22}H-90`, keys: [[0.4, 0], [6.4, 'end']] }
+      ];
+    }
+    return { base, actors, caps: o.caps, dur: adv ? 12 : 10 };
+  }
+  // M11: cycle crossing with block markings and shark teeth facing cars
+  function cycleCross(o) {
+    const BX = 520;
+    let base = bg(64) + decor(65) + surfaceH(0, 1, 0, 0, 'bike');
+    base += `<rect x="${BX - 26}" y="-10" width="52" height="${ROADY - 64 + 10}" fill="${P.bike}"/><rect x="${BX - 26}" y="${ROADY + 64}" width="52" height="200" fill="${P.bike}"/>`;
+    base += roadH(ROADY, 128, { gaps: [[BX - 34, BX + 34]] }) + rect(BX - 26, ROADY - 64, 52, 128, P.bike);
+    for (let y = ROADY - 60; y < ROADY + 60; y += 18) base += rect(BX - 34, y, 9, 9, P.mark) + rect(BX + 25, y, 9, 9, P.mark);
+    base += teeth(BX - 46, ROADY + 6, 3, 'left', 17) + teeth(BX + 46, ROADY - 52, 3, 'right', 17);
+    const actors = [
+      { g: 'bike', color: '#e05a7a', label: 'Cyclist', path: `M${BX - 10} 480V-40`, keys: [[0.6, 0], [2.6, 170], [6.6, 'end']], badges: [{ a: 2.6, b: 5.4, k: 'ok', txt: 'Has priority here' }] },
+      { g: 'car', color: P.you, label: 'You', path: JE, keys: [[0, 0], [2.6, xd(BX - 76), 'o'], [5.8, xd(BX - 76)], [9, 'end', 'i']], badges: [{ a: 2.4, b: 5.6, k: 'wait', txt: 'Shark teeth: give way' }] }
+    ];
+    return { base, actors, caps: o.caps, dur: 9.6 };
+  }
+  // M15 / M16 / M17: kerb lines (yellow solid, yellow dashed, blue)
+  function kerbLine(o) {
+    const RY = 200, k = o.kind, edge = RY + 64;
+    let base = bg(66) + houses(14, [0, 90, 180, 270, 360, 450, 540, 630, 720], 64) + rect(-10, 112, 820, 24, P.pave) + roadH(RY, 128, { kerb: false, edges: false }) + rect(-10, edge, 820, 6, P.paveD) + rect(-10, edge + 6, 820, 60, P.pave) + houses(346, [0, 90, 180, 520, 610, 700], 70);
+    if (k === 'solid') base += `<path d="M-10 ${edge - 5}H810" stroke="${P.yellow}" stroke-width="6"/>`;
+    if (k === 'dashed') base += `<path d="M-10 ${edge - 5}H810" stroke="${P.yellow}" stroke-width="6" stroke-dasharray="22 14"/>`;
+    if (k === 'blue') { base += `<path d="M120 ${edge - 4}H700" stroke="#2a63c7" stroke-width="7"/>`; for (let x = 120; x <= 700; x += 58) base += rect(x - 1, edge - 34, 3, 30, P.mark); base += `<g transform="translate(90,${edge - 18}) rotate(-90)">${G.car('#8a96a3')}</g>`.replace(/rotate\(-90\)/, 'rotate(0)'); }
+    const STOP = x => `M-90 232H${x - 70}Q${x - 30} 232 ${x} ${edge - 20}H${x + 40}Q${x + 80} ${edge - 20} ${x + 110} 232H890`;
+    const PARK = x => `M-90 232H${x - 70}Q${x - 30} 232 ${x} ${edge - 20}H${x + 36}`;
+    const pedOut = (x, t) => ({ g: 'ped', color: '#2f8a6b', noLabel: true, path: `M${x} ${edge - 4}V${edge + 30}H${x + 140}`, keys: [[t, 0], [t + 2.6, 'end']], op: [[t - .05, 0], [t, 1], [t + 2.4, 1], [t + 2.7, 0]] });
+    let actors = [], caps = o.caps, dur = 10;
+    if (k === 'solid') {
+      actors = [
+        { g: 'car', color: P.you, label: 'You', path: `M-90 232H890`, keys: [[0, 0], [6, 'end']], badges: [{ a: 1.6, b: 5, k: 'ok', txt: 'Keep driving' }] },
+        { g: 'car', color: '#c8483e', label: 'Car', path: STOP(480), keys: [[3, 0], [5.4, 600, 'o'], [7.6, 600], [10.4, 'end', 'i']], badges: [{ a: 5, b: 7.8, k: 'no', txt: 'Stopping: not allowed' }] }
+      ];
+      dur = 11;
+    } else if (k === 'dashed') {
+      actors = [
+        { g: 'car', color: P.you, label: 'You', path: STOP(300), keys: [[0, 0], [2.4, 420, 'o'], [4.6, 420], [7.4, 'end', 'i']], badges: [{ a: 2.2, b: 4.6, k: 'ok', txt: 'Dropping off: OK' }] }, pedOut(330, 2.6),
+        { g: 'car', color: '#c8483e', label: 'Car', path: PARK(560), keys: [[5, 0], [8, 'end', 'o'], [13, 'end']], badges: [{ a: 7.6, b: 12.6, k: 'no', txt: 'Parking: not allowed' }] }, pedOut(590, 8.4)
+      ];
+      dur = 13.4;
+    } else {
+      actors = [
+        { g: 'car', color: P.you, label: 'You', path: PARK(380), keys: [[0, 0], [3.2, 'end', 'o'], [9, 'end']], badges: [{ a: 3, b: 8.6, k: 'ok', txt: 'Parking disc behind windscreen' }] }, pedOut(410, 3.6)
+      ];
+      dur = 9.4;
+    }
+    return { base, actors, caps, dur };
+  }
+  // M18: temporary yellow markings at road works
+  function tempLines(o) {
+    let base = bg(68) + decor(69) + roadH(ROADY, 128);
+    base += `<path d="M-10 ${ROADY}H330Q380 ${ROADY} 410 ${ROADY - 30}H650Q690 ${ROADY - 30} 720 ${ROADY}H810" stroke="${P.yellow}" stroke-width="5" stroke-dasharray="24 14" fill="none"/>` + cones(440, E_Y - 4, 9, 24) + rect(470, E_Y - 20, 160, 46, '#f3a43a', 'opacity=".22"');
+    base += ghost(`M300 ${E_Y}H420`, 'no', 436, E_Y);
+    const actors = [
+      { g: 'car', color: P.you, label: 'You', path: `M-90 ${E_Y}H330Q380 ${E_Y} 410 ${ROADY - 4}H650Q690 ${ROADY - 4} 720 ${E_Y}H890`, keys: [[0, 0], [8, 'end']], badges: [{ a: 2, b: 6.4, k: 'ok', txt: 'Follow the yellow lines' }] },
+      { g: 'car', color: '#c8483e', noLabel: true, path: `M890 ${W_Y - 8}H-90`, keys: [[1.4, 0], [7.6, 'end']] }
+    ];
+    return { base, actors, caps: o.caps, dur: 8.6, hud: [[0, 50], [2.4, 30], [6.4, 30], [8, 50]] };
+  }
+
+  window.Scenes = { ghost, stopLine, hatched, cycleLane, cycleCross, kerbLine, tempLines, mount, speed, ban, endOf, prio, roundabout, island, turns, oneway, park: parkScene, overtake, narrow, lanes, warn, railX, tramX, zebra, busStop, deadEnd, direction, tunnel, homeZone, checkpoint, transfer, shoulder, P, xd, wd, EAST, WEST, E_Y, W_Y, ROADY, sign, label, houses, roadH, bg, decor };
 })();

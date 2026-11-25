@@ -23,7 +23,7 @@ jobs:
       - name: Collect site files
         run: |
           mkdir _site
-          cp -R index.html manifest.webmanifest sw.js app.js data.js scenes.js pwa.js icons signs .nojekyll _site/
+          cp -R index.html manifest.webmanifest sw.js app.js data.js scenes.js pwa.js icons signs markings .nojekyll _site/
       - name: Publish to gh-pages
         working-directory: _site
         env:

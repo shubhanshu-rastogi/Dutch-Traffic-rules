@@ -3,7 +3,7 @@
   const byCode = Object.fromEntries(SIGNS.map(s => [s.code, s]));
   const $ = s => document.querySelector(s);
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  const img = c => `signs/${c}.webp`;
+  const img = c => (byCode[c] && byCode[c].img) || `signs/${c}.webp`;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------- storage (per-viewer convenience only) ---------- */
@@ -55,7 +55,7 @@
     if (ctl) ctl.destroy(); ctl = null;
     $('#main').innerHTML = `<div class="wrap">
       <section class="hero" aria-labelledby="signTitle">
-        <div class="signbox"><img src="${img(code)}" alt="Road sign ${esc(code)}: ${esc(s.name)}"></div>
+        <div class="signbox${s.cat === 'M' ? ' flat' : ''}"><img src="${img(code)}" alt="${s.cat === 'M' ? 'Road marking' : 'Road sign'} ${esc(code)}: ${esc(s.name)}"></div>
         <div>
           <div class="meta"><span class="plate">${esc(code)}</span><span class="catname">${esc(cat.full)}</span></div>
           <h2 id="signTitle">${esc(s.name)}</h2>
@@ -157,7 +157,7 @@
     if (pool.length < 4) pool = SIGNS;
     const qs = shuffle(pool).slice(0, Math.min(10, pool.length)).map((s, i) => {
       const same = shuffle(SIGNS.filter(x => x.cat === s.cat && x.code !== s.code && x.name !== s.name));
-      const other = shuffle(SIGNS.filter(x => x.cat !== s.cat));
+      const other = shuffle(SIGNS.filter(x => x.cat !== s.cat && (x.cat === 'M') === (s.cat === 'M')));
       const wrong = same.concat(other).slice(0, 3);
       return { s, type: i % 2 ? 'pickSign' : 'pickName', opts: shuffle([s].concat(wrong)), answer: null };
     });
@@ -169,10 +169,10 @@
     const dots = quiz.qs.map((x, i) => `<i class="${i === quiz.i ? 'cur' : x.answer == null ? '' : x.answer === x.s.code ? 'ok' : 'bad'}"></i>`).join('');
     let body;
     if (q.type === 'pickName') {
-      body = `<div class="qprompt">What does this sign mean?</div><div class="qsign"><img src="${img(q.s.code)}" alt="Road sign to identify"></div>
+      body = `<div class="qprompt">What does this ${q.s.cat === 'M' ? 'road marking' : 'sign'} mean?</div><div class="qsign"><img src="${img(q.s.code)}" alt="Road sign to identify"></div>
         <div class="opts">${q.opts.map((o, k) => `<button class="opt" data-code="${o.code}"><span class="k">${k + 1}</span><span>${esc(o.name)}</span></button>`).join('')}</div>`;
     } else {
-      body = `<div class="qprompt">Which sign means: “${esc(q.s.name)}”?</div>
+      body = `<div class="qprompt">Which ${q.s.cat === 'M' ? 'marking' : 'sign'} means: “${esc(q.s.name)}”?</div>
         <div class="opts imgs">${q.opts.map((o, k) => `<button class="opt img" data-code="${o.code}" aria-label="Option ${k + 1}"><span class="k">${k + 1}</span><img src="${img(o.code)}" alt=""></button>`).join('')}</div>`;
     }
     $('#main').innerHTML = `<div class="quiz"><div class="qcard"><div class="qtop"><span class="count">Question ${quiz.i + 1} of ${quiz.qs.length}</span><span class="qdots">${dots}</span></div>${body}<div id="fb"></div></div></div>`;
