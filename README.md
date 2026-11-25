@@ -16,11 +16,9 @@ Then open <http://localhost:8000>. (Offline mode needs `http://localhost` or `ht
 
 ## Publish free on GitHub Pages
 
-This repository deploys itself: the workflow in `.github/workflows/pages.yml` publishes the site on every push to `main`.
+This repository deploys itself: on every push to `main`, the workflow in `.github/workflows/pages.yml` builds the site and publishes it to the `gh-pages` branch, which GitHub Pages serves. No settings to change.
 
-One-time setup on GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-
-The site is then at <https://shubhanshu-rastogi.github.io/Dutch-Traffic-rules/>.
+The site is at <https://shubhanshu-rastogi.github.io/Dutch-Traffic-rules/>.
 
 ## Install on a phone
 
